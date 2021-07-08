@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect, url_for
+# import os
 app = Flask('app')
-project_list={0:"ok"}
+project_list=[]
+# session_secret = os.environ['session-secret']
 class project:
   def __init__(self, creator, name="Untitled Project", desciption="",license="CC0"):
     self.name=name
@@ -24,8 +26,19 @@ def project_page(project_number):
   else:
         return render_template('project-404.html', project_number=project_number)
 
-@app.route('/create/')
+@app.route('/create/', methods=['GET', 'POST'])
 def createproject_page():
-  pass
+  if request.method == 'POST':
+    newProject = project("system", name = request.form["name"], license="CC0", desciption=request.form["description"])
+    project_list.append(newProject)
+    return redirect(url_for('project_page', project_number=project_list.index(newProject)))
+  return '''
+        <form method="post">
+            <input type=text name=name placeholder="Project Name"><br>
+            <input type=text name=description placeholder="Description">
+            <br>
+            <input type=submit value=Create>
+        </form>
+    '''
 
 app.run(host='0.0.0.0', port=8080)
