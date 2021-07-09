@@ -4,7 +4,7 @@
 
 We as members, contributors, and leaders pledge to make participation in our
 community a harassment-free experience for everyone, regardless of age, body
-size, visible or invisible disability, ethnicity, sex, expression, level of experience, education, socio-economic status,
+size, visible or invisible disability, ethnicity, biological sex, expression, level of experience, education, socio-economic status,
 nationality, personal appearance, race, or religion.
 
 We pledge to act and interact in ways that contribute to an open, welcoming,
