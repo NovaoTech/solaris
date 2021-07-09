@@ -1,0 +1,15 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>{{ project.name }}| Polaris</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+    <link rel="preload stylesheet" href="{{ url_for('static', filename='PlusJakartaSans.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='project-style.css') }}"/>
+  </head>
+  <body>
+    <iframe src="{{url_for_project}}" width="555" height="435" seamless="seamless">
+    </iframe>
+    <h1>{{ project.name }}</h1>
+    <h2 class="subtitle">by {{ project.creator }}</h2>
+  </body>
+</html>

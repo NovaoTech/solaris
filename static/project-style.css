@@ -1,0 +1,22 @@
+iframe[seamless]{
+    background-color: transparent;
+    border: 0px none transparent;
+    padding: 0px;
+    overflow: hidden;
+}
+*{
+  margin-left:1em;
+}
+iframe{
+  margin-left: 0;
+}
+.subtitle{
+  font-size: 1.17em;
+  color: darkslategrey;
+  top: 7.5px;
+  margin-top: 0;
+}
+#titleh1{
+  margin-bottom: 0;
+  bottom: 0;
+}

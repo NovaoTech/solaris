@@ -1,4 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
 body{
-  font-family: 'Space Mono', monospace;
+  font-family: 'Plus Jakarta Sans';
+}
+.subtitle{
+  font-size: 1.17em;
+  color: darkslategrey;
+  top: 7.5px;
+  margin: 0;
+}
+#titleh1{
+  margin: 0;
+  bottom: 0;
 }
