@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="50"
+   height="50"
+   viewBox="0 0 13.229167 13.229167"
+   version="1.1"
+   id="svg26717"
+   inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+   sodipodi:docname="starbg.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview26719"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="7.8211883"
+     inkscape:cx="4.2193077"
+     inkscape:cy="19.306529"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs26714" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="font-variation-settings:'wght' 700;fill:#090909;stroke-width:0.219417;fill-opacity:1"
+       id="rect26842"
+       width="13.229167"
+       height="13.229167"
+       x="0"
+       y="0" />
+    <path
+       id="rect6322"
+       style="font-size:141.33px;line-height:1.25;font-family:'Plus Jakarta Sans';-inkscape-font-specification:'Plus Jakarta Sans, @wght=700';font-variation-settings:'wght' 700;fill:#ffffff;fill-opacity:0.02;stroke-width:0.110773"
+       d="M 6.6145807,9.921875 C 5.8253853,7.8237656 5.407646,7.2000739 3.3072917,6.6145786 5.407646,6.0290784 5.8253853,5.405387 6.6145807,3.3072917 7.2000812,5.4076448 7.823773,5.825379 9.921875,6.6145786 7.823773,7.403778 7.2000812,7.8215122 6.6145807,9.921875 Z" />
+  </g>
+</svg>

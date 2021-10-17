@@ -43,16 +43,7 @@ def createproject_page():
       return '''
       Error! Project already exists
       '''
-  return '''
-        <form method="post">
-            <input type=text name=name placeholder="Project Name"><br>
-            <input type=text name=description placeholder="Description">
-            <br>
-            <input type=text name=hash placeholder="IPFS hash">
-            <br>
-            <input type=submit value=Create>
-        </form>
-    '''
+  return render_template('create.html')
 
 # API
 @app.route("/api/")

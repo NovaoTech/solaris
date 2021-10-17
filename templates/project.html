@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='project-style.css') }}"/>
   </head>
   <body>
-    <iframe src="{{url_for_project}}" width="555" height="435" seamless="seamless">
+    <div id="projectframe"><h1 class="left-aligned">{{ project.name }}</h1>
+    <h2 class="left-aligned">by {{ project.creator }}</h2>
+    <iframe src="{{url_for_project}}" seamless="seamless">
     </iframe>
-    <h1>{{ project.name }}</h1>
-    <h2 class="subtitle">by {{ project.creator }}</h2>
+    </div>
   </body>
 </html>

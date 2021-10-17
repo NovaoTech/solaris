@@ -4,9 +4,21 @@
     <title>Polaris</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
     <link rel="preload stylesheet" href="{{ url_for('static', filename='PlusJakartaSans.css') }}"/>
+    <meta name="theme-color" content="#090909"/>
+    
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon-package/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-package/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-package/favicon-16x16.png">
+  <link rel="manifest" href="/static/favicon-package/site.webmanifest">
+  <link rel="mask-icon" href="/static/favicon-package/safari-pinned-tab.svg" color="#090909">
+  <link rel="shortcut icon" href="/static/favicon-package/favicon.ico">
+  <meta name="msapplication-TileColor" content="#090909">
+  <meta name="msapplication-config" content="/static/favicon-package/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
   </head>
-  <body>
-    <h1 id="titleh1">Polaris</h1>
+  <body style="background-image: url('{{ url_for('static', filename='starbg.png')}}');">
+    <img id="center-logo" src="{{ url_for('static', filename='wordmark.svg') }}" alt="Polaris logo"/>
     <h2 class="subtitle">Be Freed.</h2>
   </body>
 </html>
