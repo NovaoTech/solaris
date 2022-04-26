@@ -3,6 +3,7 @@
 </script>
 <svelte:head>
     <title>Solaris - Learn to code, openly.</title>
+    <meta name="description" content="Solaris is an open-source coding community based on the extensive Scratch ecosystem and enhanced with extensions." />
 </svelte:head>
 <div id="wrapper">
     <h1>Solaris</h1>
