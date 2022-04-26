@@ -6,11 +6,11 @@
 ## Running Locally
 Clone the repository's code:
 ```sh
-git clone git@github.com:NovaoTech/corona.git
+git clone git@github.com:NovaoTech/solaris.git
 ```
 cd into the directory and install dependencies:
 ```sh
-cd corona
+cd solaris
 npm install
 ```
 Build the project and start the server:
@@ -30,11 +30,11 @@ In addition to using that commit format, we ask that you sign your commits. This
 ### Cloning for Development
 Clone the repository's code:
 ```sh
-git clone git@github.com:NovaoTech/corona.git
+git clone git@github.com:NovaoTech/solaris.git
 ```
 cd into the directory, switch branches, and install dependencies:
 ```sh
-cd corona
+cd solaris
 git switch develop
 npm install
 ```
