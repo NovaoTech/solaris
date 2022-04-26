@@ -1,7 +1,7 @@
 # solaris
 > landing page and planning repository for Solaris, the open learn-to-code platform.
 
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/) [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release) <!-- [![build status](https://github.com/novaotech/corona/actions/workflows/node.js.yml/badge.svg)](https://github.com/NovaoTech/corona/actions/) -->
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/) [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release) [![build status](https://github.com/novaotech/solaris/actions/workflows/node.js.yml/badge.svg)](https://github.com/NovaoTech/solaris/actions/)
 
 ## Running Locally
 Clone the repository's code:
