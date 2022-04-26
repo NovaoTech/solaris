@@ -23,5 +23,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "@fontsource/plus-jakarta-sans": "^4.5.6"
   }
 }
