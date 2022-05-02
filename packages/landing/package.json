@@ -1,6 +1,6 @@
 {
-  "name": "solaris",
-  "version": "0.0.1",
+  "name": "landing",
+  "version": "1.0.0",
   "scripts": {
     "dev": "svelte-kit dev",
     "build": "svelte-kit build",
