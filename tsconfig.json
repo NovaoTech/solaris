@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "declaration": true,
+      "outDir": "./build",
+      "rootDir": "./",
+      "strict": true,
+      "lib": [
+        "es2016",
+        "dom"
+      ]
+    },
+    "include": [
+      "packages/"
+    ],
+    "exclude": [
+      "node_modules",
+      "**/__tests__/*",
+      "./packages/dyson",
+      "./packages/landing"
+    ]
+  }

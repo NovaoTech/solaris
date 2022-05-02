@@ -1,0 +1,27 @@
+{
+  "name": "nebula",
+  "version": "1.0.0",
+  "description": "The project assembler for Solaris, the open learn-to-code community.",
+  "scripts": {
+    "build": "tsc"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "build": "tsc",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/NovaoTech/nebula.git"
+  },
+  "author": "Judah Brown <hello@judahbrown.xyz> (https://judahbrown.xyz/)",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/NovaoTech/nebula/issues"
+  },
+  "homepage": "https://github.com/NovaoTech/nebula#readme",
+  "devDependencies": {
+    "@types/node": "^17.0.31"
+  },
+  "dependencies": {
+    "sha512-crypt-ts": "^0.1.27"
+  }
+}
