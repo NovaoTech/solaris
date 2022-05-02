@@ -1,7 +1,10 @@
 {
-  "name": "solars",
+  "name": "solaris",
   "version": "1.0.0",
   "description": "Monorepo for Solaris, the open learn-to-code community.",
+  "repository": {
+    "url": "https://github.com/novaotech/solaris"
+  },
   "scripts": {
     "build": "rm -rf build && tsc",
     "dev-ui": "cd packages/dyson && pnpm run dev"
