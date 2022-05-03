@@ -1,0 +1,13 @@
+{
+  "name": "solaris-types",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Judah Brown <hello@judahbrown.xyz> (https://judahbrown.xyz/)",
+  "license": "GPL-3.0-or-later"
+}
