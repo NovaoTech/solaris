@@ -1,19 +1,6 @@
-export interface File {
-    name: string,
-    bytes: string
-}
+import * as solaris from "solaris-types";
 
-export interface Asset {
-    hash: string,
-    bytes: string
-}
-
-export interface RequiredAsset {
-    name: string,
-    hash: string
-}
-
-export function hashFile(file: File){
+export function hashFile(file: solaris.File){
     /**
      * Function used to hash each asset. Unsafe hash, not salted.
      * @internal
@@ -24,7 +11,7 @@ export function hashFile(file: File){
 }
 
 
-export function particulate(files: Array<any>) {
+export function particulate(files: Array<any>): Array<any> {
     /**
      * Function used to particulate a list of files into a list of assets.
      * @param files - Array of files to be particulated.
@@ -43,7 +30,7 @@ export function particulate(files: Array<any>) {
     return requiredAssets;
 }
 
-export function buildProject(files: Array<any>, meta: Object = { name: "Untitled Project", author: "Unassigned", license: "Copyright" }) {
+export function buildProject(files: Array<any>, meta: Object = { name: "Untitled Project", author: "Unassigned", license: "Copyright" }): solaris.Project {
     /**
      * Function used to assemble a project into a compact configuration file.
      * 
@@ -57,7 +44,7 @@ export function buildProject(files: Array<any>, meta: Object = { name: "Untitled
     let requiredAssets: Array<any> = particulate(files);
 
     // Add the list of assets to the configuration
-    let project: Object = { config: meta, assets: requiredAssets }
+    let project: solaris.Project = { config: meta, assets: requiredAssets };
 
     // Return the project configuration
     return project;

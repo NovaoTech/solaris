@@ -22,6 +22,7 @@
     "@types/node": "^17.0.31"
   },
   "dependencies": {
-    "sha512-crypt-ts": "^0.1.27"
+    "sha512-crypt-ts": "^0.1.27",
+    "solaris-types": "workspace:*"
   }
 }
