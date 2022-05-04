@@ -8,8 +8,8 @@
   "scripts": {
     "build": "rm -rf build && tsc",
     "dev-ui": "cd packages/dyson && pnpm run dev",
-    "lint": "prettier --ignore-path .gitignore packages",
-    "format": "prettier --ignore-path .gitignore packages"
+    "lint": "prettier .",
+    "format": "prettier --write ."
   },
   "prettier": "@github/prettier-config",
   "keywords": [],
