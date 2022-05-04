@@ -6,7 +6,12 @@ overrides:
 importers:
 
   .:
-    specifiers: {}
+    specifiers:
+      '@github/prettier-config': ^0.0.4
+      prettier: ^2.5.1
+    devDependencies:
+      '@github/prettier-config': 0.0.4
+      prettier: 2.6.2
 
   packages/dynamo:
     specifiers:
@@ -179,6 +184,10 @@ packages:
   /@fontsource/plus-jakarta-sans/4.5.8:
     resolution: {integrity: sha512-rkNIWw6q9M3cVpMxIN85IMG/MxePHl7dTSEvr6xngjvvc8FPudZpJF8R7OsFAGhxdOKXZnO3kFnqXni4Jd5Nog==}
     dev: false
+
+  /@github/prettier-config/0.0.4:
+    resolution: {integrity: sha512-ZOJ+U771Mw68qp2GPbcqPt2Xg0LEl0YwiIFHXwVLAFm2TgDnsgcCHhXO8PIxOWPqSFO4S7xIMD9CBobfaWGASA==}
+    dev: true
 
   /@iarna/toml/2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}

@@ -7,8 +7,11 @@
   },
   "scripts": {
     "build": "rm -rf build && tsc",
-    "dev-ui": "cd packages/dyson && pnpm run dev"
+    "dev-ui": "cd packages/dyson && pnpm run dev",
+    "lint": "prettier --ignore-path .gitignore packages",
+    "format": "prettier --ignore-path .gitignore packages"
   },
+  "prettier": "@github/prettier-config",
   "keywords": [],
   "author": "Judah Brown <hello@judahbrown.xyz> (https://judahbrown.xyz)",
   "license": "GPL-3.0-or-later",
@@ -16,5 +19,9 @@
     "overrides": {
       "minimist@<1.2.6": ">=1.2.6"
     }
+  },
+  "devDependencies": {
+    "@github/prettier-config": "^0.0.4",
+    "prettier": "^2.5.1"
   }
 }
