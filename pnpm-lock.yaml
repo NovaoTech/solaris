@@ -20,6 +20,7 @@ importers:
       express: ^4.18.1
       mongodb: ^4.5.0
       nodemon: ^2.0.16
+      sha512-crypt-ts: ^0.1.27
       solaris-types: workspace:*
       ts-node: ^10.7.0
       typescript: ^4.6.4
@@ -29,6 +30,7 @@ importers:
       dotenv: 16.0.0
       express: 4.18.1
       mongodb: 4.5.0
+      sha512-crypt-ts: 0.1.27
       solaris-types: link:../solaris-types
     devDependencies:
       nodemon: 2.0.16
