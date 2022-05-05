@@ -8,30 +8,30 @@ export class solarisAuthenticator {
   }
   signIn(username: string) {
     let session = {
-        user: username,
-        date: Math.floor(new Date().getTime() / 1000)
+      user: username,
+      date: Math.floor(new Date().getTime() / 1000)
     }
-    let tokenizedSession = CryptoJS.AES.encrypt(JSON.stringify(session), this.key).toString();
+    let tokenizedSession = CryptoJS.AES.encrypt(JSON.stringify(session), this.key).toString()
     return tokenizedSession
   }
   verify(ciphertext: string, username: string, threshold: number): true | false {
-    let bytes = CryptoJS.AES.decrypt(ciphertext, this.key);
-    let decryptedData;
+    let bytes = CryptoJS.AES.decrypt(ciphertext, this.key)
+    let decryptedData
     try {
-        decryptedData= JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
     } catch {
-        return false
+      return false
     }
     console.log(decryptedData)
-    if(decryptedData.user == username && Math.floor(new Date().getTime() / 1000) < decryptedData.date + threshold) {
-        return true
+    if (decryptedData.user == username && Math.floor(new Date().getTime() / 1000) < decryptedData.date + threshold) {
+      return true
     } else {
-        return false
+      return false
     }
   }
   hash(text: string): string {
     let hash: CryptoJS.lib.WordArray = CryptoJS.HmacSHA512(text, this.key)
-    return hash.toString();
+    return hash.toString()
   }
 }
 
@@ -106,11 +106,11 @@ export async function setup(client: any, database: string) {
       '$',
       '.'
     ]
-    let aeskey: string = "";
-    for (let i = 0; i < Math.floor(Math.random()*100000); i++) {
-        aeskey = aeskey+charset[Math.floor(Math.random() * charset.length)]
+    let aeskey: string = ''
+    for (let i = 0; i < Math.floor(Math.random() * 100000); i++) {
+      aeskey = aeskey + charset[Math.floor(Math.random() * charset.length)]
     }
-    token = { key: 'auth.signingToken', value: aeskey}
+    token = {key: 'auth.signingToken', value: aeskey}
     sdb.insert(database, 'config', token, client)
   }
   // Set up authenticator object

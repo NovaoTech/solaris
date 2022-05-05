@@ -103,11 +103,16 @@ app.post('/user/', async (req, res) => {
   }
 
   if (body as srq.CreateUser) {
-    let foundUser: Object = await Promise.resolve(sdb.find(database, 'users', { username: body.username }, client))
+    let foundUser: Object = await Promise.resolve(sdb.find(database, 'users', {username: body.username}, client))
     if (foundUser != null) {
       res.status(200).json({status: '400', reason: 'username'})
     } else {
-      let insertUser = { username: body.username.toLowerCase(), casedUsername: body.username , email: body.email, hashedPassword: (await authenticator).hash(body.password) }
+      let insertUser = {
+        username: body.username.toLowerCase(),
+        casedUsername: body.username,
+        email: body.email,
+        hashedPassword: (await authenticator).hash(body.password)
+      }
       sdb.insert(database, 'users', insertUser, client)
       res.status(200).json({status: 200})
     }
@@ -117,7 +122,9 @@ app.post('/user/', async (req, res) => {
 })
 
 app.get('/user/:username', async (req, res) => {
-  let foundUser = await Promise.resolve(sdb.find(database, 'users', {username: req.params.username.toLowerCase()}, client))
+  let foundUser = await Promise.resolve(
+    sdb.find(database, 'users', {username: req.params.username.toLowerCase()}, client)
+  )
   if (foundUser != null) {
     res.json(foundUser)
   } else {
@@ -126,10 +133,10 @@ app.get('/user/:username', async (req, res) => {
 })
 
 app.post('/session/', async (req, res) => {
-  req.body;
+  req.body
   if (req.body as srq.RequestToken) {
-    const user: any = await sdb.find(database, 'users', { username: req.body.username.toLowerCase() }, client);
-    if ( user != null && (await authenticator).hash(req.body.password) == user.hashedPassword) {
+    const user: any = await sdb.find(database, 'users', {username: req.body.username.toLowerCase()}, client)
+    if (user != null && (await authenticator).hash(req.body.password) == user.hashedPassword) {
       res.status(200).json((await authenticator).signIn(user.username))
     } else {
       res.status(401).json({status: '400', reason: 'username-or-password'})
@@ -140,15 +147,15 @@ app.post('/session/', async (req, res) => {
 })
 
 app.post('/session/verify/', async (req, res) => {
-  req.body;
-  if(req.body as srq.VerifyToken) {
-    if((await authenticator).verify(req.body.token, req.body.username.toLowerCase(), 30000)) {
+  req.body
+  if (req.body as srq.VerifyToken) {
+    if ((await authenticator).verify(req.body.token, req.body.username.toLowerCase(), 30000)) {
       res.status(200).json({status: '200'})
     } else {
       res.status(401).json({status: '401'})
     }
   } else {
-    res.status(400).json({ status: '400' })
+    res.status(400).json({status: '400'})
   }
 })
 
