@@ -46,8 +46,8 @@ const port: number = determinedPort
 604800000
 // Setup SAuth
 let authenticator = sauth.setup(client, database)
-let determinedAuthtimout;
-if(process.env['AUTH_TIMEOUT']) {
+let determinedAuthtimout
+if (process.env['AUTH_TIMEOUT']) {
   determinedAuthtimout = Number(process.env['AUTH_TIMEOUT'])
 } else {
   determinedAuthtimout = 604800000
@@ -138,7 +138,13 @@ app.get('/user/:username', async (req, res) => {
     sdb.find(database, 'users', {username: req.params.username.toLowerCase()}, client)
   )
   if (foundUser != null) {
-    res.json({ username: foundUser.username, casedName: foundUser.casedName, bio: foundUser.bio, comments: foundUser.comments, projects: foundUser.projects})
+    res.json({
+      username: foundUser.username,
+      casedName: foundUser.casedName,
+      bio: foundUser.bio,
+      comments: foundUser.comments,
+      projects: foundUser.projects
+    })
   } else {
     res.status(404).json({status: '404', requestedUser: `${req.params.username}`})
   }
