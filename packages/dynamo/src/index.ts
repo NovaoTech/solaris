@@ -6,8 +6,11 @@ const {MongoClient, ServerApiVersion, ObjectId} = require('mongodb')
 
 // Import solaris packages
 import * as solaris from 'solaris-types'
+import * as srq from 'solaris-types/src/requests'
 import * as sdb from './db'
+import * as sauth from './auth'
 import {error} from 'console'
+import e from 'express'
 
 // Import from .env
 dotenv.config()
@@ -41,25 +44,23 @@ if (process.env['DYNAMO_PORT']) {
 }
 const port: number = determinedPort
 
-// Process Requests
+// Setup SAuth
+let authenticator = sauth.setup(client, database)
+
+// Make express process JSON
 app.use(express.json())
+
+// Process Requeests
 app.get('/', (_req, _res) => {
   _res.json({status: '200'})
 })
 
-app.get('/assets/:assetID', async (req, res) => {
-  let foundAsset = await Promise.resolve(sdb.find(database, 'assets', {hash: req.params.assetID}, client))
-  if (foundAsset != null) {
-    res.json(foundAsset)
-  } else {
-    res.status(404).json({status: '404', requestedID: `${req.params.assetID}`})
-  }
-})
-
-app.get('/test/', async (req, res) => {
-  sdb.insert(database, 'test', {text: 'Yay, it works!', date: Date.now}, client)
-  res.status(200).json({status: '200'})
-})
+if (database == 'testing') {
+  app.get('/test/', async (req, res) => {
+    sdb.insert(database, 'test', {text: 'Yay, it works!', date: Date.now}, client)
+    res.status(200).json({status: '200'})
+  })
+}
 
 app.post('/assets/', async (req, res) => {
   let body
@@ -69,7 +70,7 @@ app.post('/assets/', async (req, res) => {
     res.status(400).json({status: '400'})
   }
 
-  if (body.bytes) {
+  if (body as srq.CreateAsset) {
     let hash: string = sha512.crypt(body.bytes, 'saltysalt').replace('$6$saltysalt$', '')
     let foundAsset: Object = await Promise.resolve(sdb.find(database, 'assets', {hash: hash}, client))
     if (foundAsset != null) {
@@ -83,6 +84,74 @@ app.post('/assets/', async (req, res) => {
     res.status(400).json({status: '400'})
   }
 })
+
+app.get('/assets/:assetID', async (req, res) => {
+  let foundAsset = await Promise.resolve(sdb.find(database, 'assets', {hash: req.params.assetID}, client))
+  if (foundAsset != null) {
+    res.json(foundAsset)
+  } else {
+    res.status(404).json({status: '404', requestedID: `${req.params.assetID}`})
+  }
+})
+
+app.post('/user/', async (req, res) => {
+  let body
+  try {
+    body = req.body
+  } catch {
+    res.status(400).json({status: '400'})
+  }
+
+  if (body as srq.CreateUser) {
+    let foundUser: Object = await Promise.resolve(sdb.find(database, 'users', { username: body.username }, client))
+    if (foundUser != null) {
+      res.status(200).json({status: '400', reason: 'username'})
+    } else {
+      let insertUser = { username: body.username.toLowerCase(), casedUsername: body.username , email: body.email, hashedPassword: (await authenticator).hash(body.password) }
+      sdb.insert(database, 'users', insertUser, client)
+      res.status(200).json({status: 200})
+    }
+  } else {
+    res.status(400).json({status: '400'})
+  }
+})
+
+app.get('/user/:username', async (req, res) => {
+  let foundUser = await Promise.resolve(sdb.find(database, 'users', {username: req.params.username.toLowerCase()}, client))
+  if (foundUser != null) {
+    res.json(foundUser)
+  } else {
+    res.status(404).json({status: '404', requestedUser: `${req.params.username}`})
+  }
+})
+
+app.post('/session/', async (req, res) => {
+  req.body;
+  if (req.body as srq.RequestToken) {
+    const user: any = await sdb.find(database, 'users', { username: req.body.username.toLowerCase() }, client);
+    if ( user != null && (await authenticator).hash(req.body.password) == user.hashedPassword) {
+      res.status(200).json((await authenticator).signIn(user.username))
+    } else {
+      res.status(401).json({status: '400', reason: 'username-or-password'})
+    }
+  } else {
+    res.status(400).json({status: '400'})
+  }
+})
+
+app.post('/session/verify/', async (req, res) => {
+  req.body;
+  if(req.body as srq.VerifyToken) {
+    if((await authenticator).verify(req.body.token, req.body.username.toLowerCase(), 30000)) {
+      res.status(200).json({status: '200'})
+    } else {
+      res.status(401).json({status: '401'})
+    }
+  } else {
+    res.status(400).json({ status: '400' })
+  }
+})
+
 // Handle Errors
 app.use(function (req, res, next) {
   res.status(404).json({status: '404'})
