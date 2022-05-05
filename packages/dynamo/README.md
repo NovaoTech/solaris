@@ -31,6 +31,7 @@ Write configuration values to .env
 | MONGODB_URI | (The URI for your MongoDB Server. Ex: `@clustername.x.mongodb.net/database`) |
 | DB | (Database to use. E.g. `testing`/`production`) |
 | DYNAMO_PORT | (Optional - Port where you want Dynamo to run. Defaults to `3000`) |
+| AUTH_TIMEOUT | (Optional - Milleseconds before authentication times out) |
 
 If all is well, you should be able to run the backend with the following command (inside the `packages/dynamo` directory):
 `pnpm run start`
