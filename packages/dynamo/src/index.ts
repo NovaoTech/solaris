@@ -43,9 +43,16 @@ if (process.env['DYNAMO_PORT']) {
   determinedPort = 3000
 }
 const port: number = determinedPort
-
+604800000
 // Setup SAuth
 let authenticator = sauth.setup(client, database)
+let determinedAuthtimout;
+if(process.env['AUTH_TIMEOUT']) {
+  determinedAuthtimout = Number(process.env['AUTH_TIMEOUT'])
+} else {
+  determinedAuthtimout = 604800000
+}
+const authtimeout = determinedAuthtimout
 
 // Make express process JSON
 app.use(express.json())
@@ -102,16 +109,21 @@ app.post('/user/', async (req, res) => {
     res.status(400).json({status: '400'})
   }
 
-  if (body as srq.CreateUser) {
+  if (body.username && body.password && body.email) {
     let foundUser: Object = await Promise.resolve(sdb.find(database, 'users', {username: body.username}, client))
+    console.log(foundUser)
     if (foundUser != null) {
-      res.status(200).json({status: '400', reason: 'username'})
+      res.status(400).json({status: '400', reason: 'username'})
     } else {
       let insertUser = {
         username: body.username.toLowerCase(),
         casedUsername: body.username,
         email: body.email,
-        hashedPassword: (await authenticator).hash(body.password)
+        hashedPassword: (await authenticator).hash(body.password),
+        level: 'unverified',
+        comments: {},
+        projects: {},
+        bio: ''
       }
       sdb.insert(database, 'users', insertUser, client)
       res.status(200).json({status: 200})
@@ -126,7 +138,7 @@ app.get('/user/:username', async (req, res) => {
     sdb.find(database, 'users', {username: req.params.username.toLowerCase()}, client)
   )
   if (foundUser != null) {
-    res.json(foundUser)
+    res.json({ username: foundUser.username, casedName: foundUser.casedName, bio: foundUser.bio, comments: foundUser.comments, projects: foundUser.projects})
   } else {
     res.status(404).json({status: '404', requestedUser: `${req.params.username}`})
   }
@@ -134,7 +146,7 @@ app.get('/user/:username', async (req, res) => {
 
 app.post('/session/', async (req, res) => {
   req.body
-  if (req.body as srq.RequestToken) {
+  if (req.body.username && req.body.password) {
     const user: any = await sdb.find(database, 'users', {username: req.body.username.toLowerCase()}, client)
     if (user != null && (await authenticator).hash(req.body.password) == user.hashedPassword) {
       res.status(200).json((await authenticator).signIn(user.username))
@@ -148,8 +160,8 @@ app.post('/session/', async (req, res) => {
 
 app.post('/session/verify/', async (req, res) => {
   req.body
-  if (req.body as srq.VerifyToken) {
-    if ((await authenticator).verify(req.body.token, req.body.username.toLowerCase(), 30000)) {
+  if (req.body.username && req.body.password) {
+    if ((await authenticator).verify(req.body.token, req.body.username.toLowerCase(), authtimeout)) {
       res.status(200).json({status: '200'})
     } else {
       res.status(401).json({status: '401'})
