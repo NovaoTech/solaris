@@ -166,7 +166,7 @@ app.post('/session/', async (req, res) => {
 
 app.post('/session/verify/', async (req, res) => {
   req.body
-  if (req.body.username && req.body.password) {
+  if (req.body.username && req.body.token) {
     if ((await authenticator).verify(req.body.token, req.body.username.toLowerCase(), authtimeout)) {
       res.status(200).json({status: '200'})
     } else {
