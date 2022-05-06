@@ -9,8 +9,10 @@ import * as solaris from 'solaris-types'
 import * as srq from 'solaris-types/src/requests'
 import * as sdb from './db'
 import * as sauth from './auth'
+import * as smail from './mail'
 import {error} from 'console'
 import e from 'express'
+import {verify} from 'crypto'
 
 // Import from .env
 dotenv.config()
@@ -43,7 +45,7 @@ if (process.env['DYNAMO_PORT']) {
   determinedPort = 3000
 }
 const port: number = determinedPort
-604800000
+
 // Setup SAuth
 let authenticator = sauth.setup(client, database)
 let determinedAuthtimout
@@ -110,7 +112,9 @@ app.post('/user/', async (req, res) => {
   }
 
   if (body.username && body.password && body.email) {
-    let foundUser: Object = await Promise.resolve(sdb.find(database, 'users', {username: body.username}, client))
+    let foundUser: Object = await Promise.resolve(
+      sdb.find(database, 'users', {username: body.username.toLowerCase()}, client)
+    )
     console.log(foundUser)
     if (foundUser != null) {
       res.status(400).json({status: '400', reason: 'username'})
@@ -120,13 +124,35 @@ app.post('/user/', async (req, res) => {
         casedUsername: body.username,
         email: body.email,
         hashedPassword: (await authenticator).hash(body.password),
-        level: 'unverified',
+        level: 'user',
+        verification:
+          (await authenticator).hash(body.username.toLowerCase()) + (await authenticator).hash(body.password),
         comments: {},
         projects: {},
         bio: ''
       }
       sdb.insert(database, 'users', insertUser, client)
       res.status(200).json({status: 200})
+    }
+  } else {
+    res.status(400).json({status: '400'})
+  }
+})
+
+app.delete('/user/', async (req, res) => {
+  req.body
+  if (req.body.username && req.body.token) {
+    if ((await authenticator).verify(req.body.token, req.body.username.toLowerCase(), authtimeout)) {
+      let result = await Promise.resolve(
+        sdb.deleteQuery(database, 'users', {username: req.body.username.toLowerCase()}, client)
+      )
+      if (result.deletedCount === 1) {
+        res.status(200).json({status: '200'})
+      } else {
+        res.status(200).json({status: '500'})
+      }
+    } else {
+      res.status(401).json({status: '401'})
     }
   } else {
     res.status(400).json({status: '400'})
@@ -174,6 +200,24 @@ app.post('/session/verify/', async (req, res) => {
     }
   } else {
     res.status(400).json({status: '400'})
+  }
+})
+
+app.get('/verify/:user/:verificationToken', async (req, res) => {
+  let foundUser = await Promise.resolve(sdb.find(database, 'users', {username: req.params.user.toLowerCase()}, client))
+  if (foundUser != null) {
+    if (foundUser.verification == req.params.verificationToken && req.params.verificationToken != 'verified') {
+      sdb.update(database, 'users', foundUser, {verification: 'verified'}, client)
+      res.status(200).json({status: '200'})
+    } else if (foundUser.verification == 'verified') {
+      res.status(400).json({status: '400', reason: 'verified'})
+    } else if (foundUser.verification != req.params.verificationToken) {
+      res.status(400).json({status: '400', reason: 'invalid'})
+    } else {
+      res.status(500).json({status: '500'})
+    }
+  } else {
+    res.status(404).json({status: '404', reason: 'username'})
   }
 })
 
