@@ -31,14 +31,6 @@ export class solarisAuthenticator {
     }
   }
   hash(text: string): string {
-    bcrypt.genSalt(10, function(err, salt) {
-    bcrypt.hash(myvalue, salt, function(err, hash) {
-        console.log(myvalue);
-        console.log(hash);
-        console.log(bcrypt.compareSync(myvalue,hash));
-    });
-});
-
     let salt = bcrypt.genSaltSync(10);
     let hash = bcrypt.hashSync(text, salt);
     return hash
