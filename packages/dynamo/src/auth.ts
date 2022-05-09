@@ -1,5 +1,6 @@
 import * as sdb from './db'
 import * as CryptoJS from 'crypto-js'
+import * as bcrypt from 'bcrypt'
 
 export class solarisAuthenticator {
   key: any
@@ -30,8 +31,17 @@ export class solarisAuthenticator {
     }
   }
   hash(text: string): string {
-    let hash: CryptoJS.lib.WordArray = CryptoJS.HmacSHA512(text, this.key)
-    return hash.toString()
+    bcrypt.genSalt(10, function(err, salt) {
+    bcrypt.hash(myvalue, salt, function(err, hash) {
+        console.log(myvalue);
+        console.log(hash);
+        console.log(bcrypt.compareSync(myvalue,hash));
+    });
+});
+
+    let salt = bcrypt.genSaltSync(10);
+    let hash = bcrypt.hashSync(text, salt);
+    return hash
   }
 }
 
