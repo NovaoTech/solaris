@@ -6,7 +6,7 @@
     "start": "nodemon ./src/index.ts"
   },
   "keywords": [],
-  "author": "Judah Brown <hello@judahbrown.xyz> (https://judahbrown.xyz/",
+  "author": "Judah Brown <hello@judahbrown.xyz> (https://judahbrown.xyz/)",
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "@types/crypto-js": "^4.1.1",
