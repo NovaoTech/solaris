@@ -1,121 +1,59 @@
 import * as sdb from './db'
-import * as CryptoJS from 'crypto-js'
+import * as bcrypt from 'bcrypt'
+import * as crypto from 'node:crypto'
+import * as jwt from 'jsonwebtoken'
+import { config } from 'dotenv';
 
 export class solarisAuthenticator {
-  key: any
-  constructor(key: any) {
-    this.key = key
+  publicKey: string
+  privateKey: string
+  constructor(keySet: { privateKey: string, publicKey: string }) {  
+    this.privateKey = keySet.privateKey
+    this.publicKey = keySet.publicKey
   }
-  signIn(username: string) {
-    let session = {
-      user: username,
-      date: Math.floor(new Date().getTime() / 1000),
-      salt: randomString(4)
-    }
-    let tokenizedSession = CryptoJS.AES.encrypt(JSON.stringify(session), this.key).toString()
-    return tokenizedSession
+  signIn(username: string, usersecret: Buffer) {
+    /* return accessToken, sessionToken */
+    return jwt.sign(
+      {
+        username: username,
+        jwtid: crypto.randomBytes(100).toString("base64"),
+        secret: usersecret
+      },
+      this.privateKey,
+      { expiresIn: "100d" }
+    )
   }
-  verify(ciphertext: string, username: string, threshold: number): true | false {
-    let bytes = CryptoJS.AES.decrypt(ciphertext, this.key)
-    let decryptedData
-    try {
-      decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8))
-    } catch {
-      return false
-    }
-    if (decryptedData.user == username && Math.floor(new Date().getTime() / 1000) < decryptedData.date + threshold) {
-      return true
-    } else {
-      return false
-    }
+  verifyJWT(ciphertext: string, username: string, threshold: number): true | false | 'refresh' {
+    return true
   }
-  hash(text: string): string {
-    let hash: CryptoJS.lib.WordArray = CryptoJS.HmacSHA512(text, this.key)
-    return hash.toString()
+  hashPass(password: string) {
+    let salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(password, salt);
   }
 }
 
-function randomString(length: number) {
-  let charset = [
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f',
-    'g',
-    'h',
-    'i',
-    'j',
-    'k',
-    'l',
-    'm',
-    'n',
-    'o',
-    'p',
-    'q',
-    'r',
-    's',
-    't',
-    'u',
-    'v',
-    'w',
-    'x',
-    'y',
-    'z',
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '0',
-    '!',
-    '$',
-    '.'
-  ]
-  let aeskey: string = ''
-  for (let i = 0; i < length; i++) {
-    aeskey = aeskey + charset[Math.floor(Math.random() * charset.length)]
-  }
-  return aeskey
+function generateKeys(bits: number = 2048) {
+  let options: crypto.RSAKeyPairOptions<'pem', 'pem'> = {
+    publicKeyEncoding: {
+      type: 'spki',
+      format: 'pem'
+    },
+    privateKeyEncoding: {
+      type: 'pkcs8',
+      format: 'pem'
+    },
+    modulusLength: bits,
+   };
+  let { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", options)
+  return { publicKey, privateKey }
 }
-export async function setup(client: any, database: string) {
-  let token = await Promise.resolve(sdb.find(database, 'config', {key: 'auth.signingToken'}, client))
-  if (token == null) {
-    // Set up configuration
-    token = {key: 'auth.signingToken', value: randomString(Math.floor(Math.random() * 100000))}
-    sdb.insert(database, 'config', token, client)
+
+export async function setup() {
+  let keySet = await Promise.resolve(sdb.Config.findOne({key: 'auth.keySet'}))
+  if (keySet == null) {
+    keySet = generateKeys()
+    sdb.Config.create({key: 'auth.keySet', value: keySet})
   }
   // Set up authenticator object
-  return Promise.resolve(new solarisAuthenticator(token.value))
+  return new solarisAuthenticator(keySet)
 }
