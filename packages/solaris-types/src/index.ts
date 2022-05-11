@@ -17,3 +17,8 @@ export interface RequiredAsset {
   name: string
   hash: string
 }
+
+export interface AccessToken {
+  token: string
+  expires: number
+}

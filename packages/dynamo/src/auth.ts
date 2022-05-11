@@ -2,33 +2,39 @@ import * as sdb from './db'
 import * as bcrypt from 'bcrypt'
 import * as crypto from 'node:crypto'
 import * as jwt from 'jsonwebtoken'
-import { config } from 'dotenv';
+import {config} from 'dotenv'
 
 export class solarisAuthenticator {
   publicKey: string
   privateKey: string
-  constructor(keySet: { privateKey: string, publicKey: string }) {  
-    this.privateKey = keySet.privateKey
-    this.publicKey = keySet.publicKey
+  constructor(keySet: any) {
+    this.privateKey = keySet.value.privateKey
+    this.publicKey = keySet.value.publicKey
   }
   signIn(username: string, usersecret: Buffer) {
     /* return accessToken, sessionToken */
     return jwt.sign(
       {
         username: username,
-        jwtid: crypto.randomBytes(100).toString("base64"),
-        secret: usersecret
+        jwtid: crypto.randomBytes(100).toString('base64'),
+        secret: usersecret,
+        validUntil: Date.now() + 8640000000
       },
       this.privateKey,
-      { expiresIn: "100d" }
+      {algorithm: 'PS256', expiresIn: '100d'}
     )
   }
-  verifyJWT(ciphertext: string, username: string, threshold: number): true | false | 'refresh' {
-    return true
+  verifyJWT(refreshToken: any): any {
+    return jwt.verify(refreshToken, this.publicKey)
   }
   hashPass(password: string) {
-    let salt = bcrypt.genSaltSync(10);
-    return bcrypt.hashSync(password, salt);
+    return bcrypt.hashSync(password, 10)
+  }
+  verifyPass(password: string, hashed: string) {
+    return bcrypt.compare(password, hashed)
+  }
+  genSecret(length: number): string {
+    return crypto.randomBytes(length).toString('base64')
   }
 }
 
@@ -42,18 +48,19 @@ function generateKeys(bits: number = 2048) {
       type: 'pkcs8',
       format: 'pem'
     },
-    modulusLength: bits,
-   };
-  let { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", options)
-  return { publicKey, privateKey }
+    modulusLength: bits
+  }
+  let {publicKey, privateKey} = crypto.generateKeyPairSync('rsa', options)
+  return {publicKey, privateKey}
 }
 
-export async function setup() {
-  let keySet = await Promise.resolve(sdb.Config.findOne({key: 'auth.keySet'}))
+export async function setup(): Promise<solarisAuthenticator> {
+  let keySet = await sdb.Config.findOne({key: 'auth.keySet'})
   if (keySet == null) {
     keySet = generateKeys()
-    sdb.Config.create({key: 'auth.keySet', value: keySet})
+    sdb.Config.createSync({key: 'auth.keySet', value: keySet})
   }
+
   // Set up authenticator object
   return new solarisAuthenticator(keySet)
 }
