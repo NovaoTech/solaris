@@ -11,28 +11,74 @@ export class solarisAuthenticator {
     this.privateKey = keySet.value.privateKey
     this.publicKey = keySet.value.publicKey
   }
-  signIn(username: string, usersecret: Buffer) {
-    /* return accessToken, sessionToken */
-    return jwt.sign(
-      {
-        username: username,
-        jwtid: crypto.randomBytes(100).toString('base64'),
-        secret: usersecret,
-        validUntil: Date.now() + 8640000000
-      },
+
+  newAccessToken(username: string, freshness: 'fresh' | 'non-fresh'): {accessToken: string; jwtId: string} {
+    let jwtId: string = crypto.randomBytes(100).toString('base64')
+    username = username.toLowerCase()
+    let accessToken: string = jwt.sign(
+      {username: username, jwtId: jwtId, freshness: freshness, type: 'accessToken'},
       this.privateKey,
-      {algorithm: 'PS256', expiresIn: '100d'}
+      {algorithm: 'PS256', expiresIn: '15m'}
     )
+    return {accessToken: accessToken, jwtId: jwtId}
   }
-  verifyJWT(refreshToken: any): any {
-    return jwt.verify(refreshToken, this.publicKey)
+
+  newRefreshToken(username: string): {refreshToken: string; jwtId: string} {
+    let jwtId: string = crypto.randomBytes(100).toString('base64')
+    username = username.toLowerCase()
+    let refreshToken: string = jwt.sign({username: username, jwtId: jwtId, type: 'refreshToken'}, this.privateKey, {
+      algorithm: 'PS256',
+      expiresIn: '100d'
+    })
+    return {refreshToken: refreshToken, jwtId: jwtId}
   }
+
+  verifyToken(
+    token: string,
+    username: string,
+    type: 'any' | 'refreshToken' | 'accessToken' = 'any'
+  ):
+    | {type: 'refreshToken' | 'accessToken'; freshness: 'fresh' | 'non-fresh'; expired: true | false; payload: any}
+    | undefined {
+    let decodedToken: any = jwt.verify(token, this.publicKey)
+    username = username.toLowerCase()
+    if (
+      decodedToken &&
+      decodedToken.type &&
+      decodedToken.jwtId &&
+      decodedToken.username &&
+      decodedToken.username == username
+    ) {
+      if ((type != 'any' && type == decodedToken.type) || type == 'any') {
+        let freshness
+        if (decodedToken.freshness) {
+          freshness = decodedToken.freshness
+        } else {
+          freshness = 'fresh'
+        }
+        let expired
+        if (decodedToken.expires < Date.now()) {
+          expired = false
+        } else {
+          expired = true
+        }
+        return {type: decodedToken.type, freshness: freshness, expired: expired, payload: decodedToken}
+      } else {
+        return undefined
+      }
+    } else {
+      return undefined
+    }
+  }
+
   hashPass(password: string) {
-    return bcrypt.hashSync(password, 10)
+    return bcrypt.hashSync(password, 12)
   }
+
   verifyPass(password: string, hashed: string) {
     return bcrypt.compare(password, hashed)
   }
+
   genSecret(length: number): string {
     return crypto.randomBytes(length).toString('base64')
   }

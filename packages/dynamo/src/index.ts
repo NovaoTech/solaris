@@ -101,7 +101,7 @@ app.get('/user/:username', async (req, res) => {
 })
 
 // Handle requests to start a new session
-app.post('/session/', async (req, res) => {
+app.post('/session/create/', async (req, res) => {
   req.body
   if (req.body.username && req.body.password) {
     // Request is valid, continue with processing
@@ -116,11 +116,11 @@ app.post('/session/', async (req, res) => {
         user.secret = (await authenticator).genSecret(65)
       }
       // Generate a refresh token and add it to the user's tokens.
-      const refreshToken = (await authenticator).signIn(user.username.toLowerCase(), user.secret)
-      user.validRefreshTokens.push(refreshToken)
+      const refreshToken = (await authenticator).newRefreshToken(user.username.toLowerCase())
+      user.validRefreshTokens.push(refreshToken.jwtId)
       // Save the data added and return a successful code.
       await user.save()
-      res.status(200).json({status: 200, refreshToken: refreshToken})
+      res.status(200).json({status: 200, refreshToken: refreshToken.refreshToken})
     } else {
       // The username and/or password are invalid. Return an error.
       res.status(400).json({status: 400, reason: 'username-or-password'})
@@ -135,78 +135,47 @@ app.post('/session/', async (req, res) => {
 app.post('/session/refresh/', async (req, res) => {
   req.body
   if (req.body.username && req.body.refreshToken) {
+    // Request is valid. Query the DB for the user and check the token.
     let user = await sdb.User.findOne({username: req.body.username.toLowerCase()})
     let rt: string = req.body.refreshToken
-    let tokenValidity
-    try {
-      tokenValidity = (await authenticator).verifyJWT(rt)
-    } catch {
-      tokenValidity = false
-    }
-    console.log(typeof user.validRefreshTokens)
-    if (user && rt && tokenValidity) {
-      // Request contains valid information
-      // Check to see if the refreshToken matches the username
-      let decoded = (await authenticator).verifyJWT(rt)
-      if (decoded.username == user.username) {
-        // The refreshToken matches the username
-        // Check to see if the refreshToken is current
-        let x = []
-        if (user.validRefreshTokens.find((token: any) => token == rt) != undefined && Date.now() < decoded.validUntil) {
-          // RefreshToken is valid. Return a new accessToken
-          let accessToken = {
-            token: (await authenticator).genSecret(100),
-            expires: Date.now() + 864000000
-          }
-          user.validAccessTokens.push(accessToken)
-          await user.save()
-          res.status(200).json({status: 200, accessToken: accessToken})
-        } else if (
-          user.validRefreshTokens.find((token: any) => token == rt) != undefined &&
-          Date.now >= decoded.validUntil
-        ) {
-          // RefreshToken is expired
-          // Remove the refreshToken from the user
-          user.validRefreshTokens.splice(user.validRefreshTokens.findIndex(rt), 1)
-          // Return an error
-          res.status(400).json({status: 400, reason: 'refreshToken-expired'})
-        } else if (
-          user.validRefreshTokens.find((token: any) => token == rt) == undefined &&
-          Date.now < decoded.validUntil
-        ) {
-          // The RSA key has been compromised. Return a generic error and log to console.
-          res.status(400).json({status: 400})
-          console.error('Warning: The RSA key has been potentially compromised.')
+    let token = (await authenticator).verifyToken(rt, req.body.username, 'refreshToken')
+    if (user && rt && token != undefined) {
+      // Token is valid
+      if (!token.expired) {
+        // The token is not expired
+        let refreshTokens = user.validRefreshTokens
+        if (refreshTokens.find((processing: string) => processing == token?.payload.jwtId)) {
+          // This token is still valid! Hurrah! Generate a new accessToken for the user.
+          let result = (await authenticator).newAccessToken(user.username, 'non-fresh')
+          // Since this is a short-lived accessToken, we don't have to bother with pushing it to the DB.
+          res.status(200).json({status: 200, accessToken: result.accessToken})
         } else {
-          // The request is completely invalid.
+          // Token theft has occured. Revoke all sessions for the user.
+          user.validRefreshTokens = []
+          await user.save()
           res.status(400).json({status: 400})
         }
       } else {
-        // The refreshToken does not match the username
-        // Check to see if the refreshToken is valid for the contained user
-        let hackedUser = await sdb.User.findOne({username: decoded.username})
-        if (hackedUser.validRefreshTokens.find((token: any) => token == rt)) {
-          // The refreshToken is still valid, so invalidate it.
-          hackedUser.validRefreshTokens.splice(hackedUser.validRefreshTokens.findIndex(rt), 1)
-          // Save the user, return status
-          await hackedUser.save()
-          res.status(403).json({status: 403, message: 'Hackers Begone!'})
-        } else {
-          // The refreshToken is invalid, so no action is needed.
-          res.status(403).json({status: 403, message: 'Hackers Begone!'})
-        }
+        // The token is expired. `splice` it from the user's tokens.
+        user.validRefreshTokens.splice(
+          user.validRefreshTokens.findIndex((jwtId: any) => token?.payload.jwtId == jwtId),
+          1
+        )
+        await user.save()
+        res.status(400).json({status: 400, reason: 'refreshToken-expired'})
       }
-    } else if (rt && !user && req.body.username) {
-      // Request contains an invalid username
-      res.status(400).json({status: 400, reason: 'username'})
-      return
-    } else if (!rt || !req.body.username) {
-      // Request is missing the refreshToken OR the username paramater
-      res.status(400).json({status: 400, reason: 'refreshToken-or-username-missing'})
+    } else if (user && rt && !token) {
+      // Token is invalid, but the user is valid
+      res.status(400).json({status: 400, reason: 'refreshToken-invalid'})
+    } else if (!user && rt && token) {
+      // Token is valid, but the user is not valid
+      res.status(400).json({status: 400, reason: 'username-invalid'})
     } else {
-      res.status(400).json({status: 400, reason: 'refreshToken-expired'})
+      // Token is/(not) valid and/or the user is/(not)
+      res.status(400).json({status: 400})
     }
   } else {
+    // The request is invalid
     res.status(400).json({status: 400, reason: 'refreshToken-or-username-missing'})
   }
 })
@@ -219,24 +188,21 @@ app.post('/session/verify/', async (req, res) => {
     let user = await sdb.User.findOne({username: req.body.username.toLowerCase()})
     if (user != null) {
       // The user requested does exist. Continue with processing
-      if (user.validAccessTokens.find((token: any) => token == req.body.accessToken)) {
-        // Check to see if the token is expired
-        if (Date.now() < req.body.accessToken.expires) {
-          // The token is valid, return a new status
-          res.status(200).json({status: 200})
-        } else {
-          // The token is invalid, remove it from the list of tokens.
-          user.validAccessTokens.splice(user.validAccessTokens.findIndex(user.accessToken), 1)
-          await user.save()
-          res.status(401).json({status: 401, reason: 'accessToken-expired'})
-        }
-      } else {
-        // The token does not exist on the user. Return a status code
-        res.status(401).json({status: 401})
-      }
+      let result = (await authenticator).verifyToken(req.body.accessToken, user.username, 'accessToken')
+      if (result && !result.expired) {
+        // The token is 100% valid!
+        res.status(200).json({status: 200, freshness: result.freshness})
+      } else if (result && result.expired) {
+        // The token is valid, but expired
+        res.status(400).json({status: 400, reason: 'accessToken-expired'})
+      } else
+        [
+          // The token is invalid for some reason
+          res.status(400).json({status: 400})
+        ]
     } else {
       // The username is invalid. Return a status code.
-      res.status(400).json({status: 400})
+      res.status(400).json({status: 400, reason: 'username'})
     }
   } else {
     // The request is invalid. Terminate processing.
