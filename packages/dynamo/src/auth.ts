@@ -40,7 +40,12 @@ export class solarisAuthenticator {
   ):
     | {type: 'refreshToken' | 'accessToken'; freshness: 'fresh' | 'non-fresh'; expired: true | false; payload: any}
     | undefined {
-    let decodedToken: any = jwt.verify(token, this.publicKey)
+    let decodedToken: any
+    try {
+      decodedToken = jwt.verify(token, this.publicKey)
+    } catch {
+      return undefined
+    }
     username = username.toLowerCase()
     if (
       decodedToken &&
@@ -57,7 +62,7 @@ export class solarisAuthenticator {
           freshness = 'fresh'
         }
         let expired
-        if (decodedToken.expires < Date.now()) {
+        if (decodedToken.exp < Date.now()) {
           expired = false
         } else {
           expired = true

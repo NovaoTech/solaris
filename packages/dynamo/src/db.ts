@@ -14,7 +14,7 @@ export const User = mongoose.model(
     role: {type: String},
     secret: {type: String},
     validRefreshTokens: Array,
-    validAccessTokens: Array
+    messages: Array
   })
 )
 
