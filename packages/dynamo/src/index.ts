@@ -158,6 +158,7 @@ app.post('/user/', async (req, res) => {
   }
 })
 
+// Handle requests for user deletion
 app.delete('/user/', accessTokenCheckpoint, async (req, res) => {
   let body = req.body
   if (body.token.freshness == 'fresh') {
