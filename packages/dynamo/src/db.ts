@@ -5,6 +5,7 @@ export const User = mongoose.model(
   new mongoose.Schema({
     username: {type: String, required: true, unique: true},
     casedUsername: String,
+    userSecret: String,
     email: String,
     hashedPassword: String,
     level: String,

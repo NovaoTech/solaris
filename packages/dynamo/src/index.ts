@@ -86,7 +86,7 @@ async function refreshTokenCheckpoint(req: any, res: any, next: any) {
     let token = (await authenticator).verifyToken(rt, req.body.username, 'refreshToken')
     if (user && rt && token != undefined) {
       // Token is valid
-      if (!token.expired) {
+      if (!token.expired && user.secret == token.payload.userSecret) {
         // The token is not expired
         let refreshTokens = user.validRefreshTokens
         if (refreshTokens.find((processing: string) => processing == token?.payload.jwtId)) {
@@ -95,17 +95,26 @@ async function refreshTokenCheckpoint(req: any, res: any, next: any) {
         } else {
           // Token theft has occured. Revoke all sessions for the user.
           user.validRefreshTokens = []
+          user.secret = (await authenticator).genSecret(100)
           await user.save()
           res.status(400).json({status: 400})
         }
-      } else {
+      } else if (token.expired) {
         // The token is expired. `splice` it from the user's tokens.
-        user.validRefreshTokens.splice(
-          user.validRefreshTokens.findIndex((jwtId: any) => token?.payload.jwtId == jwtId),
-          1
-        )
+        if (user.validRefreshTokens.find((processing: string) => processing == token?.payload.jwtId)) {
+          user.validRefreshTokens.splice(
+            user.validRefreshTokens.findIndex((jwtId: any) => token?.payload.jwtId == jwtId),
+            1
+          )
+        }
         await user.save()
         res.status(400).json({status: 400, reason: 'refreshToken-expired'})
+      } else if (user.secret != token.payload.userSecret) {
+        // Token theft has occured, but has already been handled
+        res.status(400).json({status: 400})
+      } else {
+        // Something happened, but I don't know what. The token isn't valid here.
+        res.status(400).json({status: 400})
       }
     } else if (user && rt && !token) {
       // Token is invalid, but the user is valid
@@ -142,6 +151,7 @@ app.post('/user/', async (req, res) => {
       sdb.User.create({
         username: body.username.toLowerCase(),
         casedUsername: body.username,
+        secret: (await authenticator).genSecret(100),
         email: body.email,
         hashedPassword: (await authenticator).hashPass(body.password),
         level: 'unverified',
@@ -180,7 +190,7 @@ app.get('/user/:username', async (req, res) => {
     // The username requested is valid. Return its data
     res.status(200).json({
       username: foundUser.username,
-      casedName: foundUser.casedName,
+      casedUsername: foundUser.casedUsername,
       bio: foundUser.bio,
       comments: foundUser.comments,
       projects: foundUser.projects
@@ -207,7 +217,7 @@ app.post('/session/create/', async (req, res) => {
         user.secret = (await authenticator).genSecret(65)
       }
       // Generate a refresh token and add it to the user's tokens.
-      const refreshToken = (await authenticator).newRefreshToken(user.username.toLowerCase())
+      const refreshToken = (await authenticator).newRefreshToken(user.username.toLowerCase(), user.secret)
       user.validRefreshTokens.push(refreshToken.jwtId)
       // Save the data added and return a successful code.
       await user.save()
@@ -223,7 +233,7 @@ app.post('/session/create/', async (req, res) => {
 })
 
 // Handle requests to refresh access tokens
-app.post('/session/refresh/', async (req, res) => {
+app.post('/session/refresh/', refreshTokenCheckpoint, async (req, res) => {
   req.body
   // This token is still valid! Hurrah! Generate a new accessToken for the user.
   let result = (await authenticator).newAccessToken(req.body.username, 'non-fresh')
