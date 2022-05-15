@@ -4,29 +4,29 @@ export interface ProjectPackage {
 }
 
 export interface Project {
-  project: Object,
-  author: String,
-  published: Number,
-  comments: Array<Comment>,
-  parent: String,
-  id: String,
+  project: Object
+  author: String
+  published: Number
+  comments: Array<Comment>
+  parent: String
+  id: String
   name: String
 }
 
 export interface Comment {
-  user: String,
-  message: String,
-  timestamp: Number,
-  replies: Array<Replies>,
+  user: String
+  message: String
+  timestamp: Number
+  replies: Array<Replies>
   id: String
 }
 
 export interface Replies {
-  user: String,
-  message: String,
-  timestamp: Number,
-  replies: Array<Replies>,
-  id: String,
+  user: String
+  message: String
+  timestamp: Number
+  replies: Array<Replies>
+  id: String
   parent: String
 }
 

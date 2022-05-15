@@ -306,14 +306,17 @@ app.get('/assets/:assetID', async (req, res) => {
 })
 
 // Handle requests for projects
-app.get('/:username/:projectName',async (req, res) => {
-  let project = sdb.Project.findOne({ author: req.params.username.toLowerCase(), id: req.params.projectName.toLowerCase() })
+app.get('/:username/:projectName', async (req, res) => {
+  let project = sdb.Project.findOne({
+    author: req.params.username.toLowerCase(),
+    id: req.params.projectName.toLowerCase()
+  })
   if (project) {
     // Project exists! Hurrah! Return the found project.
     res.status(200).json(project)
   } else {
     // Project doesn't exist. Return an error.
-    res.status(404).json({ status: 404 })
+    res.status(404).json({status: 404})
   }
 })
 
