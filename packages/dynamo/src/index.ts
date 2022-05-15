@@ -9,6 +9,7 @@ import * as solaris from 'solaris-types'
 import * as srq from 'solaris-types/src/requests'
 import * as sdb from './db'
 import * as sauth from './auth'
+import { verify } from 'jsonwebtoken'
 
 // Import from .env
 dotenv.config()
@@ -260,7 +261,7 @@ app.delete('/session/', refreshTokenCheckpoint, async (req: any, res) => {
 })
 
 // Handle requests for asset creation
-app.post('/assets/', async (req, res) => {
+app.post('/assets/', accessTokenCheckpoint, async (req, res) => {
   let body = req.body
   if (body.bytes) {
     // The request is valid! Hurrah! Continue with processing
