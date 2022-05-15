@@ -272,7 +272,7 @@ app.post('/assets/', accessTokenCheckpoint, async (req, res) => {
       res.status(200).json({hash: hash})
     } else {
       // The asset doesn't exist in the system. Add the asset and its hash to the DB.
-      await sdb.Asset.create({hash: hash, bytes: body.bytes})
+      await sdb.Asset.create({hash: hash, bytes: body.bytes, uploadedBy: body.username})
       res.status(200).json({hash: hash})
     }
   } else {

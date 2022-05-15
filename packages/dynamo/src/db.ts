@@ -25,6 +25,7 @@ export const Asset = mongoose.model(
   'Asset',
   new mongoose.Schema({
     hash: String,
-    bytes: String
+    bytes: String,
+    uploadedBy: String
   })
 )
