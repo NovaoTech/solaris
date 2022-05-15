@@ -26,10 +26,14 @@ export class solarisAuthenticator {
   newRefreshToken(username: string, userSecret: string): {refreshToken: string; jwtId: string} {
     let jwtId: string = crypto.randomBytes(100).toString('base64')
     username = username.toLowerCase()
-    let refreshToken: string = jwt.sign({username: username, jwtId: jwtId, userSecret: userSecret, type: 'refreshToken'}, this.privateKey, {
-      algorithm: 'PS256',
-      expiresIn: '100d'
-    })
+    let refreshToken: string = jwt.sign(
+      {username: username, jwtId: jwtId, userSecret: userSecret, type: 'refreshToken'},
+      this.privateKey,
+      {
+        algorithm: 'PS256',
+        expiresIn: '100d'
+      }
+    )
     return {refreshToken: refreshToken, jwtId: jwtId}
   }
 

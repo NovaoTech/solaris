@@ -1,3 +1,4 @@
+import * as solaris from 'solaris-types'
 const mongoose = require('mongoose')
 
 export const User = mongoose.model(
@@ -27,5 +28,25 @@ export const Asset = mongoose.model(
     hash: String,
     bytes: String,
     uploadedBy: String
+  })
+)
+
+/*
+
+  TO-DO: Figure out how to make the Username and/or Name unique for each one.
+  (E.g, user/project0, user/project1, and user1/project0 but not user/project and user/project)
+
+*/
+
+export const Project = mongoose.model(
+  'Project',
+  new mongoose.Schema({
+    project: Object,
+    author: String,
+    published: Number,
+    comments: Array,
+    parent: String,
+    id: String,
+    name: String
   })
 )

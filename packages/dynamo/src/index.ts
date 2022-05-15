@@ -9,7 +9,7 @@ import * as solaris from 'solaris-types'
 import * as srq from 'solaris-types/src/requests'
 import * as sdb from './db'
 import * as sauth from './auth'
-import { verify } from 'jsonwebtoken'
+import {verify} from 'jsonwebtoken'
 
 // Import from .env
 dotenv.config()
@@ -138,6 +138,12 @@ app.get('/', (_req, _res) => {
   _res.json({status: 200})
 })
 
+/*
+
+  TO-DO: Restrain the characters available in usernames.
+
+*/
+
 // Handle requests for user creation
 app.post('/user/', async (req, res) => {
   let body = req.body
@@ -260,6 +266,12 @@ app.delete('/session/', refreshTokenCheckpoint, async (req: any, res) => {
   res.status(200).json({status: 200})
 })
 
+/*
+
+  TO-DO: Limit the size of assets.
+
+*/
+
 // Handle requests for asset creation
 app.post('/assets/', accessTokenCheckpoint, async (req, res) => {
   let body = req.body
@@ -290,6 +302,18 @@ app.get('/assets/:assetID', async (req, res) => {
   } else {
     // The asset does not exist in the system. Send an error.
     res.status(404).json({status: 404, requestedID: `${req.params.assetID}`})
+  }
+})
+
+// Handle requests for projects
+app.get('/:username/:projectName',async (req, res) => {
+  let project = sdb.Project.findOne({ author: req.params.username.toLowerCase(), id: req.params.projectName.toLowerCase() })
+  if (project) {
+    // Project exists! Hurrah! Return the found project.
+    res.status(200).json(project)
+  } else {
+    // Project doesn't exist. Return an error.
+    res.status(404).json({ status: 404 })
   }
 })
 
