@@ -108,10 +108,11 @@ function generateKeys(bits: number = 2048) {
 export async function setup(): Promise<solarisAuthenticator> {
   let keySet = await sdb.Config.findOne({key: 'auth.keySet'})
   if (keySet == null) {
-    keySet = generateKeys()
-    sdb.Config.createSync({key: 'auth.keySet', value: keySet})
+    let generatedKeySet = generateKeys()
+    sdb.Config.create({key: 'auth.keySet', value: generatedKeySet})
+    keySet = { key: 'auth.keySet', value: generatedKeySet }
   }
-
+  
   // Set up authenticator object
   return new solarisAuthenticator(keySet)
 }
