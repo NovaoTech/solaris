@@ -154,7 +154,7 @@ app.post('/user/', async (req, res) => {
       // A user already exists with the requested username. Terminate processing and return an error
       res.status(400).json({status: 400, reason: 'username-taken'})
     } else {
-      // The username is not taken. Create a new user with the requested paramaters
+      // The username is not taken. Check the username, then create a new user with the requested paramaters
       sdb.User.create({
         username: body.username.toLowerCase(),
         casedUsername: body.username,

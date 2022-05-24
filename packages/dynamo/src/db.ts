@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 export const User = mongoose.model(
   'User',
   new mongoose.Schema({
-    username: {type: String, required: true, unique: true},
+    username: {type: String, required: true, unique: true, lowercase: true},
     casedUsername: String,
     userSecret: String,
     email: String,
@@ -13,8 +13,8 @@ export const User = mongoose.model(
     comments: Array,
     projects: Array,
     bio: String,
-    role: {type: String},
-    secret: {type: String},
+    role: String,
+    secret: String,
     validRefreshTokens: Array,
     messages: Array
   })
@@ -31,18 +31,12 @@ export const Asset = mongoose.model(
   })
 )
 
-/*
-
-  TO-DO: Figure out how to make the Username and/or Name unique for each one.
-  (E.g, user/project0, user/project1, and user1/project0 but not user/project and user/project)
-
-*/
-
 export const Project = mongoose.model(
   'Project',
   new mongoose.Schema({
     project: Object,
     author: String,
+    url: { type: String, unique: true, lowercase: true},
     published: Number,
     comments: Array,
     parent: String,
