@@ -9,6 +9,7 @@ import * as solaris from 'solaris-types'
 import * as srq from 'solaris-types/src/requests'
 import * as sdb from './db'
 import * as sauth from './auth'
+import {verify} from 'jsonwebtoken'
 
 // Import from .env
 dotenv.config()
@@ -137,6 +138,12 @@ app.get('/', (_req, _res) => {
   _res.json({status: 200})
 })
 
+/*
+
+  TO-DO: Restrain the characters available in usernames.
+
+*/
+
 // Handle requests for user creation
 app.post('/user/', async (req, res) => {
   let body = req.body
@@ -147,7 +154,7 @@ app.post('/user/', async (req, res) => {
       // A user already exists with the requested username. Terminate processing and return an error
       res.status(400).json({status: 400, reason: 'username-taken'})
     } else {
-      // The username is not taken. Create a new user with the requested paramaters
+      // The username is not taken. Check the username, then create a new user with the requested paramaters
       sdb.User.create({
         username: body.username.toLowerCase(),
         casedUsername: body.username,
@@ -259,8 +266,14 @@ app.delete('/session/', refreshTokenCheckpoint, async (req: any, res) => {
   res.status(200).json({status: 200})
 })
 
+/*
+
+  TO-DO: Limit the size of assets.
+
+*/
+
 // Handle requests for asset creation
-app.post('/assets/', async (req, res) => {
+app.post('/assets/', accessTokenCheckpoint, async (req, res) => {
   let body = req.body
   if (body.bytes) {
     // The request is valid! Hurrah! Continue with processing
@@ -271,7 +284,7 @@ app.post('/assets/', async (req, res) => {
       res.status(200).json({hash: hash})
     } else {
       // The asset doesn't exist in the system. Add the asset and its hash to the DB.
-      await sdb.Asset.create({hash: hash, bytes: body.bytes})
+      await sdb.Asset.create({hash: hash, bytes: body.bytes, uploadedBy: body.username})
       res.status(200).json({hash: hash})
     }
   } else {
@@ -289,6 +302,21 @@ app.get('/assets/:assetID', async (req, res) => {
   } else {
     // The asset does not exist in the system. Send an error.
     res.status(404).json({status: 404, requestedID: `${req.params.assetID}`})
+  }
+})
+
+// Handle requests for projects
+app.get('/:username/:projectName', async (req, res) => {
+  let project = sdb.Project.findOne({
+    author: req.params.username.toLowerCase(),
+    id: req.params.projectName.toLowerCase()
+  })
+  if (project) {
+    // Project exists! Hurrah! Return the found project.
+    res.status(200).json(project)
+  } else {
+    // Project doesn't exist. Return an error.
+    res.status(404).json({status: 404})
   }
 })
 
