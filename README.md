@@ -6,7 +6,7 @@
 
 ## What is Solaris
 
-Solaris (formerly Polaris) is an open-source alternative to the mainstreme Scratch website that adds in more advance features such as Extentions and custom licensing. We hope to create this open platform to allow a more open approach to learning a programming language and to allow those who wish for a more advance Scratch platform to still have a great community to go with it.
+Solaris (formerly Polaris) is an open-source alternative to the mainline Scratch website that incorporates more advance features such as Extensions and Custom Licensing. We aim to create a platform to allow a more open approach to learning programming, and to allow those who wish for a more advanced Scratch experience to have a community.
 
 ## Contributing
 
